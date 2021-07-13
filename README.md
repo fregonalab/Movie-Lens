@@ -1,2 +1,2 @@
-# Movie-Lens
+# MovieLens
 HarvardX Professional Certificate - Final Project
