@@ -20,7 +20,7 @@ dim(edx)
 str(edx, vec.len = 2)
 
 #Small sample of observations
-head(edx)
+head(edx) 
 
 #Distinct values of each predictors
 edx %>%
@@ -126,7 +126,10 @@ edx %>%
   ggplot(aes(rating)) +
   geom_histogram(binwidth = 0.5, colour = "black", fill = "white") +
   scale_x_continuous(breaks = seq(0, 5, by=0.5)) +
-  stat_bin(binwidth = 0.5, aes(label = ..count..), vjust = -0.5, geom = "text")
+  stat_bin(binwidth = 0.5, aes(label = ..count..), vjust = -0.5, geom = "text") +
+  ylab("Frequency") +
+  xlab("Rating") +
+  theme_bw()
 
 ## Genres ##
 
@@ -139,62 +142,66 @@ edx %>%
   geom_bar(stat = "identity", colour = "black", fill = "white") +
   coord_flip()
 
-#Average rating per genre - Note that the avg values are confidently different from each other
+#Average rating per genre - Note that the avg values indeed varies
 edx %>%  
   group_by(genres) %>%
-  mutate(n = n()) %>%
-  filter(n >= 50000) %>%
   summarise(n = n(),
             avg = mean(rating),
             se = sd(rating)/sqrt(n)) %>%
+  filter(n >= 1000) %>%
   ggplot(aes(x = reorder(genres, avg), y = avg, ymin = avg - qnorm(0.975)*se, ymax = avg + qnorm(0.975)*se)) +
   geom_point() +
-  geom_errorbar()
+  geom_errorbar() +
+  theme_bw() +
+  theme(axis.ticks.x = element_blank()) +
+  theme(axis.text.x = element_blank()) +
+  ggtitle("Average movie rating per genre", subtitle = "Genre effect") +
+  ylab("Average Movie Rating") +
+  xlab("Genres (n = 797) - no labels")
   
 ## Timestamp
 
 ##Calculating the difference between the released year of a movie, 
 #and the time it was rated by an user.
-edx <- edx %>%
+edx_t <- edx %>%
   mutate(rating_year = year(as_datetime(timestamp)),
          release_year = as.numeric(str_sub(title, -5, -2))) %>%
-  mutate(diff_years = as.numeric(rating_year) - release_year) %>%
-  select(userId, movieId, rating, diff_years, title, genres)
+  mutate(timediff = as.numeric(rating_year) - release_year) %>%
+  select(userId, movieId, rating, timediff, title, genres)
 
-#Distribuition - Most ratings were recent to movie's release year
-edx %>%
-  ggplot(aes(diff_years)) +
+#Distribution - Most ratings were recent to movie's release year
+edx_t %>%
+  ggplot(aes(timediff)) +
   geom_histogram(binwidth = 1, colour = "black", fill = "white") 
 
 #Number of movies
-edx %>%
-  count(diff_years)
+edx_t %>%
+  count(timediff)
 
 #Release year - percentage of ratings
-edx %>%
-  count(diff_years) %>%
+edx_t %>%
+  count(timediff) %>%
   mutate(rating_year = case_when(
-    diff_years == 1 ~ "release year",
-    diff_years <= 5 ~ "less than 5 years",
+    timediff == 1 ~ "release year",
+    timediff <= 5 ~ "less than 5 years",
     TRUE ~ "more than 5 years"
-    ), total = sum(n)) %>%
+  ), total = sum(n)) %>%
   group_by(rating_year) %>%
-  summarise(ratio = unique(sum(n)/total)*100) %>%
-  knitr::kable()
+  summarise(ratio = unique(sum(n)/total)*100)
 
-#Loess - geom_point (all points)
-edx %>%
-  group_by(diff_years) %>%
+#Variability of movie ratings average throughout time
+edx_t %>%
+  group_by(timediff) %>%
   summarise(n = n(),
             avg = mean(rating),
             se = sd(rating)/sqrt(n)) %>%
-  ggplot(aes(diff_years, y = avg, ymin = avg - qnorm(0.975)*se, ymax = avg + qnorm(0.975)*se)) +
+  ggplot(aes(timediff, y = avg, ymin = avg - qnorm(0.975)*se, ymax = avg + qnorm(0.975)*se)) +
   geom_point() +
   geom_errorbar() +
   theme_classic() + 
   ylab("Average movie rating") +
   xlab("Differencial between movie launch year and user rating year") +
-  ggtitle("Average rating per year after movie launch", subtitle = "Nostalgia effect")
+  ggtitle("Average rating per year after movie launch", subtitle = "Time effect")
 
 
 

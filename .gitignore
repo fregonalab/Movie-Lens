@@ -1,4 +1,6 @@
-Movie-Lens.Rproj
+.DS_Store
+*.log
+\code.R
 \ml-10M100K
 \rda
 .Rproj.user
