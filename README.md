@@ -5,7 +5,7 @@
 * [Technologies](#technologies)
 
 ## Description
-This project built a movie reccomendation system by using a small subset of the original data provided by Netflix. To create it, two distinct algoritms where performed, a model-based approach and matrix factorization. The model-based approach was less accurate, but much faster. The matrix factorization have got a excellent RMSE score, however demanded more computational power.
+This project aims to develop a movie recommendation system by using a small subset of the original data provided by Netflix. To create it, two distinct algorithms where performed, a model-based approach and matrix factorization. The model-based approach was less accurate, but much faster. The matrix factorization have got a excellent RMSE score, however demanded more computational power.
 	
 ## Technologies
 Project is created with:
